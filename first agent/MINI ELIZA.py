@@ -23,22 +23,53 @@ rules = {
         "How long have you been {0}?",
         "How do you feel about being {0}?"
     ],
+    r'I like (.*)': [
+        "Why do you like {0}?",
+        "What do you think {0} can bring to you?",
+        "For what reason do you like {0}?"
+    ],
+    r'I am learning (.*)': [
+        "How do you feel about learning {0}?",
+        "What do you think {0} can bring to you?",
+        "For what reason do you learn {0}?"
+    ],
     r'.* mother .*': [
         "Tell me more about your mother.",
         "What was your relationship with your mother like?",
         "How do you feel about your mother?"
     ],
-    r'.* father .*': [
+    r'.* father .*': [ 
         "Tell me more about your father.",
         "How did your father make you feel?",
         "What has your father taught you?"
     ],
+ r'.* job .*': [
+        "Tell me more about your job.",
+        "How did your job make you feel?",
+        "Why do you choose this job?"
+    ],
     r'.*': [
         "Please tell me more.",
         "Let's change focus a bit... Tell me about your family.",
-        "Can you elaborate on that?"
+        "Can you elaborate on that?",
+         'How old are you?',
+        'what is your name?'
     ]
 }
+rules2= {
+    r'My name is (.*)':[
+        "I remember that your name is {0}."
+    ],
+    r'My job is (.*)':[
+        "I remember that your job is {0}."
+    ],
+    r'I am (.* years old)':[
+        "I remember that you are {0} years old."
+    ],
+}
+
+#记忆库
+set=set()
 
 # 定义代词转换规则
 pronoun_swap = {
@@ -69,18 +100,45 @@ def respond(user_input):
             swapped_group = swap_pronouns(captured_group)
             # 从模板中随机选择一个并格式化
             response = random.choice(responses).format(swapped_group)
+            response=response
             return response
     # 如果没有匹配任何特定规则，使用最后的通配符规则
     return random.choice(rules[r'.*'])
-
+def memory(user_input):
+    """
+    根据规则库生成响应
+    """
+    for pattern,responses in rules2.items():
+        match = re.search(pattern, user_input, re.IGNORECASE)
+        if match:
+            # 捕获匹配到的部分
+            captured_group = match.group(1) if match.groups() else ''
+            # 进行代词转换
+            swapped_group = swap_pronouns(captured_group)
+            #加入记忆库
+            set.add(swapped_group)
+            if random.randint(0,1) and len(set)>0:
+                memorize=''
+            else:
+                memorize=random.choice(responses).format(swapped_group)
+            return memorize
+    # 如果没有匹配任何特定规则，使用最后的通配符规则
+    return random.choice(rules[r'.*'])
 # 主聊天循环
 if __name__ == '__main__':
-    print("Therapist: Hello! How can I help you today?")
+    question ={'Hello! How can I help you today?',
+               'Hi!What\' s your job?',
+               'Hello! What are you learning these days?',
+               'Hi! What do you like?',
+               'How old are you?',
+               'what is your name?'}
+    print(f"Therapist: {random.choice(list(question))}")
     while True:
         user_input = input("You: ")
         if user_input.lower() in ["quit", "exit", "bye"]:
             print("Therapist: Goodbye. It was nice talking to you.")
             break
+        memorize=memory(user_input)
         response = respond(user_input)
-        print(f"Therapist: {response}")
+        print(f"Therapist: {memorize+response}")
         
