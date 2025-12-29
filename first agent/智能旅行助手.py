@@ -15,9 +15,9 @@ Action: [这里是你要调用的工具，格式为 function_name(arg_name="arg_
 
 请开始吧！
 """
+
 import requests
 import json
-
 def get_weather(city: str) -> str:
     """
     通过调用 wttr.in API 查询真实的天气信息。
@@ -51,7 +51,8 @@ def get_weather(city: str) -> str:
 
 import os
 from tavily import TavilyClient
-
+from dotenv import load_dotenv
+load_dotenv('.env')
 def get_attraction(city: str, weather: str) -> str:
     """
     根据城市和天气，使用Tavily Search API搜索并返回优化后的景点推荐。
@@ -131,11 +132,12 @@ import re
 
 # --- 1. 配置LLM客户端 ---
 # 请根据您使用的服务，将这里替换成对应的凭证和地址
-API_KEY = "ms-2669d7c2-290a-4c7f-afc9-e828b00df564"
+
+
+API_KEY =  os.getenv("MODELSCAPE_API_KEY")
 BASE_URL = "https://api-inference.modelscope.cn/v1"
 MODEL_ID = "deepseek-ai/DeepSeek-V3.2"
-TAVILY_API_KEY="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"
-os.environ['TAVILY_API_KEY'] = "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"
+TAVILY_API_KEY = os.getenv("tavily_API_KEY")
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
@@ -149,7 +151,7 @@ prompt_history = [f"用户请求: {user_prompt}"]
 
 print(f"用户输入: {user_prompt}\n" + "="*40)
 
-# --- 3. 运行主循环 ---
+# --- 3. 运行主循环 --
 for i in range(5): # 设置最大循环次数
     print(f"--- 循环 {i+1} ---\n")
     
